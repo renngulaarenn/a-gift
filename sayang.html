@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Kutipan Gambar</title>
+  <style>
+    body {
+      background-color: #696969;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      height: 100vh;
+      margin: 0;
+      font-family: sans-serif;
+    }
+
+    #quoteImage {
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+
+    .quote-box {
+      margin-top: 10px;
+      background-color: #444;
+      color: white;
+      padding: 10px;
+      border-radius: 10px;
+      width: 250px;
+      text-align: center;
+      opacity: 0;
+      transform: translateY(10px);
+      animation: fadeInUp 0.3s forwards;
+      transition: transform 0.2s;
+      cursor: pointer;
+    }
+
+    /* Untuk kotak pertanyaan dan respons */
+    .main-question,
+    .response-box {
+      background-color: #333;
+      color: white;
+    }
+
+    /* Container untuk dua kotak pilihan */
+    .option-container {
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+      margin-top: 10px;
+    }
+
+    @keyframes fadeInUp {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    #backgroundAudio {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <!-- Gambar -->
+  <img id="quoteImage" src="ai_yang_dapat_digunakan_di_android_4.png" alt="Kutipan" width="200" />
+
+  <!-- Elemen Audio -->
+  <audio id="backgroundAudio" autoplay loop>
+    <source src="https://github.com/renngulaarenn/lagu/raw/refs/heads/main/Paper%20Lily%20Chapter%201%20OST%EF%BC%9A%2022%20-%20A%20Single%20White%20Lily.mp3 " type="audio/mpeg">
+    Browser Anda tidak mendukung elemen audio.
+  </audio>
+
+  <script>
+    const quoteImage = document.getElementById('quoteImage');
+
+    const quotes = [
+      "haiii.",
+      "tunggu duluu, pelan pelan sajaa tekannyaa..",
+      "sesuai arahan sticky note ji kahh? no cheating pls",
+      "jadi bagaimana hari ini? wonderful or nah?",
+      "hati hati lee, ada jamskernya ini...",
+      "hiyaiyaiyaiya jas kidingg",
+      "langsung mo sajak lee, biar ndak lama & cepatko istirahatt, hehee",
+      "isi_link"
+    ];
+
+    const responses = {
+      wonderful: "NAISUUU, pasti banyak juga kue mudapat leee, awkawkawkawkawk",
+      nah: "aww, gara gara kenapa yaaa? sakit gigi? dimarahi guru? namarahiko pute? awkkawkawawkawk"
+    };
+
+    let currentIndex = 0;
+    let isBranching = false;
+
+    // Batas maksimal kotak kutipan yang ditampilkan
+    const maxVisibleBoxes = 5;
+
+    quoteImage.onmousedown = function () {
+      quoteImage.style.transform = 'scale(0.9)';
+    };
+
+    quoteImage.onmouseup = function () {
+      quoteImage.style.transform = 'scale(1.0)';
+    };
+
+    quoteImage.onclick = function () {
+      // Trigger audio play jika diblokir
+      const audio = document.getElementById('backgroundAudio');
+      if (audio.paused) audio.play();
+
+      // Jika sudah mencapai akhir, hentikan eksekusi
+      if (currentIndex >= quotes.length) {
+        return;
+      }
+
+      // Jika sudah di percabangan, jangan tambah kutipan lagi
+      if (isBranching) return;
+
+      // Cek apakah ini kutipan percabangan
+      if (quotes[currentIndex] === "jadi bagaimana hari ini? wonderful or nah?") {
+        isBranching = true;
+
+        // Tambahkan kotak pertanyaan (tetap muncul)
+        const questionBox = document.createElement('div');
+        questionBox.className = 'quote-box main-question';
+        questionBox.textContent = quotes[currentIndex];
+        quoteImage.parentNode.appendChild(questionBox);
+
+        // Buat container untuk 2 kotak pilihan
+        const optionContainer = document.createElement('div');
+        optionContainer.className = 'option-container';
+
+        // Buat kotak pilihan
+        const option1 = createOptionBox("wonderful.", () => {
+          showResponse(responses.wonderful);
+        });
+
+        const option2 = createOptionBox("nah.", () => {
+          showResponse(responses.nah);
+        });
+
+        // Tambahkan kotak ke container
+        optionContainer.appendChild(option1);
+        optionContainer.appendChild(option2);
+
+        // Tambahkan container ke halaman
+        quoteImage.parentNode.appendChild(optionContainer);
+
+        currentIndex++; // Lanjut ke kutipan berikutnya setelah percabangan
+      } else {
+        // Tambah kotak kutipan normal
+        const newBox = document.createElement('div');
+        newBox.className = 'quote-box';
+        newBox.textContent = quotes[currentIndex];
+
+        quoteImage.parentNode.appendChild(newBox);
+        currentIndex++;
+
+        // Periksa jumlah kotak dan hapus yang terlama jika melebihi batas
+        const allBoxes = document.querySelectorAll('.quote-box:not(.main-question):not(.response-box)');
+        if (allBoxes.length > maxVisibleBoxes) {
+          allBoxes[0].remove(); // Hapus kotak kutipan teratas
+        }
+      }
+    };
+
+    function createOptionBox(text, onClick) {
+      const box = document.createElement('div');
+      box.className = 'quote-box';
+      box.textContent = text;
+
+      // Efek skala saat diklik
+      box.onmousedown = () => box.style.transform = 'scale(0.9)';
+      box.onmouseup = () => box.style.transform = 'scale(1.0)';
+      box.onclick = (e) => {
+        e.stopPropagation(); // Hindari trigger klik pada gambar
+        onClick();
+      };
+
+      return box;
+    }
+
+    function showResponse(responseText) {
+      isBranching = false;
+
+      // Hapus container pilihan
+      const optionContainer = document.querySelector('.option-container');
+      if (optionContainer) optionContainer.remove();
+
+      // Tampilkan respons
+      const responseBox = document.createElement('div');
+      responseBox.className = 'quote-box response-box';
+      responseBox.textContent = responseText;
+      quoteImage.parentNode.appendChild(responseBox);
+    }
+  </script>
+</body>
+</html>
